@@ -1,0 +1,6 @@
+/tmp
+
+# repos
+/bitnami-docker-tensorflow-serving
+/bitnami-docker-tensorflow-inception
+/tensorflow-serving
