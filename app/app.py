@@ -47,14 +47,25 @@ def deleteModel(id):
 
 @app.route('/predictions', methods=['POST'])
 def createPrediction():
-    modelName = request.form['model']
+    model = request.form['model']
     imageFile = request.files['image']
-    return "create prediction model={}, image={}\n".format(modelName, imageFile)
+    predicted = _predict(imageFile, model)
+    return "create prediction model={}, image={}, predict={}\n".format(model, imageFile, predicted)
 
 
 def _randomHash():
     return random.getrandbits(32)
 
+
+def _predict(input, model):
+    channel = implementations.insecure_channel('tensorflow-serving', 9000)
+    stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
+    request = predict_pb2.PredictRequest()
+    request.model_spec.name = model
+    request.model_spec.signature_name = 'predict_images'
+    request.inputs['images'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(input.read(), shape=[1]))
+    return stub.Predict(request, 10.0)  # 10 secs timeout
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True)
