@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 import os
 import random
 import subprocess
@@ -50,7 +50,14 @@ def updateModel(id):
 
 @app.route('/models/<string:id>', methods=['DELETE'])
 def deleteModel(id):
-    return "delete model {}\n".format(id)
+    found = TrainedModel.query.filter_by(hash_id = id).first()
+    if found:
+        db.session.delete(found)
+        db.session.commit()
+        return "deleted {}\n".format(found.hash_id)
+    else:
+        return make_response('not found', 404)
+
 
 
 @app.route('/predictions', methods=['POST'])
