@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, g, jsonify, make_response, render_template
 import os
 import random
 import subprocess
 from flask_sqlalchemy import SQLAlchemy
+import time
 
 from grpc.beta import implementations
 import tensorflow as tf
@@ -17,11 +18,15 @@ db.init_app(app)
 from models import TrainedModel
 
 
+@app.before_request
+def before_request():
+    g.request_start_time = time.gmtime()
+    g.request_time = lambda: "%.5fs" % (time.gmtime() - g.request_start_time)
+
+
 @app.route('/')
 def index():
-    command = 'pwd'
-    result = subprocess.check_output([command], shell=True)
-    return "Meow, {}.\n".format(result)
+    return render_template('list.html')
 
 
 @app.route('/models')
@@ -36,7 +41,7 @@ def listModels():
 @app.route('/models', methods=['POST'])
 def createModel():
     name = request.form['name']
-    modelFile = request.files['model']
+    # modelFile = request.files['model']
     trainedModel = TrainedModel(name)
     db.session.add(trainedModel)
     db.session.commit()
@@ -45,7 +50,17 @@ def createModel():
 
 @app.route('/models/<string:id>', methods=['PUT', 'PATCH'])
 def updateModel(id):
-    return "update model {}\n".format(id)
+    name = request.form['name']
+    modelFile = request.files['model']
+    found = TrainedModel.query.filter_by(hash_id = id).first()
+    if found:
+        if name:
+            found.name = name
+        # handle model file update
+        db.session.commit()
+        return "updated {}\n".format(found.id)
+    else:
+        return make_response('not found', 404)
 
 
 @app.route('/models/<string:id>', methods=['DELETE'])

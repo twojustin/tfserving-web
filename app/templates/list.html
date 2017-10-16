@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div id='list' class='row justify-content-center'>
+  <div class='col-6'>
+    <h1>Models</h1>
+    <model-list></model-list>
+    <model-create></model-create>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='create.js') }}?v={{ g.request_start_time }}"></script>
+<script src="{{ url_for('static', filename='list.js') }}?v={{ g.request_start_time }}"></script>
+
+{% endblock %}
