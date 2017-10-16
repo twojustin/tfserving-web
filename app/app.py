@@ -41,24 +41,26 @@ def listModels():
 @app.route('/models', methods=['POST'])
 def createModel():
     name = request.form['name']
+    # TODO: if model is missing, this line causes bad_request response
     # modelFile = request.files['model']
     trainedModel = TrainedModel(name)
     db.session.add(trainedModel)
     db.session.commit()
-    return "create model name={}\n".format(name)
+    return jsonify(trainedModel.serialize)
 
 
 @app.route('/models/<string:id>', methods=['PUT', 'PATCH'])
 def updateModel(id):
     name = request.form['name']
-    modelFile = request.files['model']
+    # TODO: if model is missing, this line causes bad_request response
+    # modelFile = request.files['model']
     found = TrainedModel.query.filter_by(hash_id = id).first()
     if found:
         if name:
             found.name = name
-        # handle model file update
+        # TODO: handle model file update
         db.session.commit()
-        return "updated {}\n".format(found.id)
+        return jsonify(found.serialize)
     else:
         return make_response('not found', 404)
 
@@ -80,7 +82,7 @@ def createPrediction():
     model = request.form['model']
     imageFile = request.files['image']
     predicted = _predict(imageFile, model)
-    return "{}\n".format(predicted)
+    return str(predicted)
 
 
 def _predict(input, model):
