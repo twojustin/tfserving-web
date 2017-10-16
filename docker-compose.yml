@@ -23,13 +23,13 @@ services:
     depends_on:
       - db
 
-  # tensorflow-serving:
-  #   image: 'bitnami/tensorflow-serving:latest'
-  #   ports:
-  #     - 9000:9000
-  #   volumes:
-  #     - 'tensorflow_serving_data:/bitnami'
-  #     - './tmp/model-data:/bitnami/model-data'
+  tensorflow-serving:
+    image: 'twojustin/tfserving-built'
+    command: /serving/bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --enable_batching=false  --batching_parameters_file="" --model_base_path="/model-data"  --file_system_poll_wait_seconds=1
+    ports:
+      - 9000:9000
+    volumes:
+      - './tmp/model-data:/model-data'
 
 volumes:
   tensorflow_serving_data:
