@@ -4,7 +4,7 @@
 #
 
 # Clone the source from Github
-git clone --recurse https://github.com/tensorflow/serving
+git clone --recurse-submodules https://github.com/tensorflow/serving
 
 # Pin the version of Tensorflow Serving and its submodule
 # v1.3.0
